@@ -1,12 +1,6 @@
 <template>
   <div class="live view-container">
-    <common-nav
-      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
-      :active="active.nav"
-      search
-      class="sidebar"
-      @change="onNavChange"
-    />
+    <common-nav :list="navList" :active="active.nav" search class="sidebar" @change="onNavChange" />
 
     <div class="content">
       <div v-if="classList.length > 1" class="header">
@@ -156,8 +150,8 @@ const active = ref({
   loading: false,
 });
 
+const navList = computed(() => config.value.list.map((t) => ({ id: t.id, name: t.name })));
 const isThumbnail = computed(() => (item: IChannel) => config.value.extra.thumbnail && item.thumbnail);
-
 const LOAD_TEXT_OPTIONS = computed(() => ({
   complete: t('common.infiniteLoading.complete'),
   error: t('common.infiniteLoading.error'),

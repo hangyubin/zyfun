@@ -1,12 +1,6 @@
 <template>
   <div class="analyze view-container">
-    <common-nav
-      :list="config.list.map((t) => ({ id: t.id, name: t.name }))"
-      :active="active.nav"
-      search
-      class="sidebar"
-      @change="onNavChange"
-    />
+    <common-nav :list="navList" :active="active.nav" search class="sidebar" @change="onNavChange" />
 
     <div class="content">
       <div class="header">
@@ -99,8 +93,6 @@ const searchValue = ref('');
 const currentUrl = ref('about:blank');
 const webviewRef = ref<typeof WebviewView | null>(null);
 
-const platform = computed(() => (storeSetting.isChinaMainland ? CN_PLATFORM : OTHER_PLATFORM));
-
 const config = ref({
   default: {} as IModels['analyze'],
   list: [] as IModels['analyze'][],
@@ -112,6 +104,9 @@ const active = ref({
   nav: '',
   loading: false,
 });
+
+const navList = computed(() => config.value.list.map((t) => ({ id: t.id, name: t.name })));
+const platform = computed(() => (storeSetting.isChinaMainland ? CN_PLATFORM : OTHER_PLATFORM));
 
 onMounted(() => {
   getSetting();
