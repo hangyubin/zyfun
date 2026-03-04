@@ -91,7 +91,7 @@ export const prepare = async (uuid: string, force: boolean = false): Promise<ICm
       logger.error(error as Error);
 
       lruCache.delete(idHash);
-      throw new Error('Cms adapter init failed', { cause: error as Error });
+      throw new Error(`Cms adapter init failed, cause: ${(error as Error).message}`);
     }
   }
 };
@@ -102,8 +102,7 @@ export const terminate = async () => {
     const SingleAdapter = singleton(module);
     if (SingleAdapter?.terminate) await SingleAdapter.terminate();
   }
-  for (const [key, adapter] of lruCache.entries()) {
-    await adapter?.terminate?.();
+  for (const [key, _adapter] of lruCache.entries()) {
     lruCache.delete(key);
   }
 };
