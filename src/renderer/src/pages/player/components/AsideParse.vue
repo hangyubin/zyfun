@@ -377,9 +377,6 @@ const onSettingChange = (item) => {
   const { skipTimeInStart = 30, skipTimeInEnd = 30, skipHeadAndEnd, skipAd } = item;
 
   /** sync skip time */
-  historyData.value.skipTimeInStart = skipTimeInStart;
-  historyData.value.skipTimeInEnd = skipTimeInEnd;
-
   videoData.value.skipTimeInStart = skipTimeInStart;
   videoData.value.skipTimeInEnd = skipTimeInEnd;
 
