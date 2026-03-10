@@ -13,10 +13,8 @@
         v-model="searchValue"
         :placeholder="$t('component.search.placeholder.input')"
         class="search-input"
-        clearable
         @enter="handleSearch"
         @click="handleInputFocus"
-        @clear.stop="handleSearch('')"
       >
         <template #label>
           <t-select
@@ -31,8 +29,16 @@
             <t-option key="all" :label="$t('pages.setting.base.site.searchMap.all')" value="all" />
           </t-select>
         </template>
-        <template #suffixIcon>
-          <search-icon />
+        <template #suffix>
+          <template v-if="searchValue">
+            <t-button shape="square" size="small" class="suffix-btn" @click.stop="handleSearch('')">
+              <close-circle-filled-icon />
+            </t-button>
+            <t-divider layout="vertical" />
+          </template>
+          <t-button shape="square" size="small" class="suffix-btn" @click.stop="handleSearch(searchValue)">
+            <template #icon><search-icon /></template>
+          </t-button>
         </template>
       </t-input>
 
@@ -101,7 +107,7 @@ defineOptions({
 });
 
 import { toSubtract, toYMD } from '@shared/modules/date';
-import { DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import { CloseCircleFilledIcon, DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PopupVisibleChangeContext } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -343,6 +349,10 @@ const reloadKwConfig = async ({ data: eventData }) => {
       background-color: transparent;
       border-width: 0;
       box-shadow: none;
+
+      .suffix-btn {
+        width: var(--td-comp-size-xxxs);
+      }
     }
   }
 }
