@@ -18,10 +18,9 @@ export default {
         large: '大',
       },
     },
-    hot: '熱榜',
-    site: {
-      title: '站點',
-      hotMap: {
+    hot: {
+      title: '熱榜',
+      map: {
         baidu: '百度',
         douban: '豆瓣',
         enlightent: '雲合',
@@ -29,7 +28,18 @@ export default {
         komect: '移動愛家',
         quark: '誇克',
       },
-      searchMap: {
+    },
+    association: {
+      title: '聯想',
+      map: {
+        douban: '豆瓣',
+        iqiyi: '愛奇藝',
+        snm: '喜粵TV',
+      },
+    },
+    site: {
+      title: '站點',
+      search: {
         local: '本站',
         group: '組內',
         all: '全部',

@@ -17,6 +17,7 @@ export default {
   },
   search: {
     title: '搜索',
+    association: '搜索联想',
     history: '搜索历史',
     placeholder: {
       input: '搜索全网资源',

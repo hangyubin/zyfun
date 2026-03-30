@@ -4,11 +4,15 @@
 
 ## 3.4.4
 
+- 特性: 支持搜索联想
 - 优化: mac/window侧边栏配色
 - 修复: windows x64平台调用npminstall失败
 - 修复: webview组件 缺失请求头加载方法
 - 修复: 改进更新行为，防止意外自动更新
 - 修复: window部分情况关闭窗口导致整个应用程序崩溃; arm平台打包失败
+- 修复: 热榜接口id字段重复情况
+- 变动: 数据库字段(注意备份)
+- 变动: 用户协议(及时查看, 强制弹出)
 - 变动: 依赖库升级
 
 [View on GitHub](https://github.com/Hiram-Wong/ZyPlayer/releases/tag/v3.4.4)

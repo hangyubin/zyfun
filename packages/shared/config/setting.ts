@@ -14,6 +14,13 @@ export enum REC_HOT_TYPE {
 }
 export type IRecHotType = `${REC_HOT_TYPE}`;
 
+export enum REC_ASSOCIATION_TYPE {
+  DOUBAN = 'douban',
+  IQIYI = 'iqiyi',
+  SNM = 'snm',
+}
+export type IRecAssociationType = `${REC_ASSOCIATION_TYPE}`;
+
 export enum PLAYER_TYPE {
   XGPLAYER = 'xgplayer',
   DPLAYER = 'dplayer',
