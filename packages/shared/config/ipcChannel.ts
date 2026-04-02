@@ -104,6 +104,7 @@ export enum IPC_CHANNEL {
   WEBVIEW_LINK_BLOCK = 'webview:link-block',
   WEBVIEW_LINK_BLOCK_RELAY = 'webview:link-block-relay',
   WEBVIEW_HEADER_BLOCK = 'webview:header-block',
+  WEBVIEW_SEARCH_HOTKEY = 'webview:search-hotkey',
 
   // window
   WINDOW_CLOSE = 'window:close',
