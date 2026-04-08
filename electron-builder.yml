@@ -83,7 +83,6 @@ files:
   - '!**/{LICENSE,LICENSE.txt,ThirdPartyNotices.txt,NOTICE.txt,README.md,RELEASE.md,CHANGELOG.md}'
   - '!node_modules/rollup-plugin-visualizer'
 
-  - 'resources/**/*' # include all files in resources, and unpack them from asar for runtime access
 asarUnpack:
   - out/proxy/**
   - resources/**

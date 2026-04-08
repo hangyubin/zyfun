@@ -93,9 +93,6 @@ importers:
       turndown:
         specifier: ^7.2.4
         version: 7.2.4
-      uiohook-napi:
-        specifier: ^1.5.5
-        version: 1.5.5
       workerpool:
         specifier: ^10.0.1
         version: 10.0.1
@@ -9151,10 +9148,6 @@ packages:
   uint8-util@2.2.5:
     resolution: {integrity: sha512-/QxVQD7CttWpVUKVPz9znO+3Dd4BdTSnFQ7pv/4drVhC9m4BaL2LFHTkJn6EsYoxT79VDq/2Gg8L0H22PrzyMw==}
 
-  uiohook-napi@1.5.5:
-    resolution: {integrity: sha512-oSlTdnECw2GBfsJPTbBQBeE4v/EXP0EZmX6BJq5nzH/JgFaBE8JpFwEA/kLhiEP7HxQw28FViWiYgdIZzWuuJQ==}
-    engines: {node: '>= 16'}
-
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -17410,7 +17403,8 @@ snapshots:
 
   node-forge@1.4.0: {}
 
-  node-gyp-build@4.8.4: {}
+  node-gyp-build@4.8.4:
+    optional: true
 
   node-gyp@11.5.0:
     dependencies:
@@ -19652,10 +19646,6 @@ snapshots:
   uint8-util@2.2.5:
     dependencies:
       base64-arraybuffer: 1.0.2
-
-  uiohook-napi@1.5.5:
-    dependencies:
-      node-gyp-build: 4.8.4
 
   undici-types@7.16.0: {}
 

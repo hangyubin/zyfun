@@ -72,7 +72,6 @@
     "sync-fetch": "^0.6.0",
     "sync-request": "^6.1.0",
     "turndown": "^7.2.4",
-    "uiohook-napi": "^1.5.5",
     "workerpool": "^10.0.1",
     "zeromq": "^6.5.0"
   },
