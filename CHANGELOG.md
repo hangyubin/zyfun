@@ -11,7 +11,7 @@
 - 特性: 播放页隐身模式(鼠标移入播放, 移出暂停并隐藏窗口)
 - 修复: windows x64平台调用npminstall失败
 - 修复: 窗口崩溃时间存储错误
-- 修复: T3Drpy和T3Catopen适配器同步方法postType为form请求错误
+- 修复: T3Drpy和T3Catopen适配器同步方法postType为form请求错误; T0Xml和T1Json适配器处理playUrl获取链接错误
 - 修复: 老板键触发缺未暂停视频播放
 - 修复: cms接口返回url数组时无法正确处理
 - 修复: 影视有源但为选择时无法触发全部搜索问题
