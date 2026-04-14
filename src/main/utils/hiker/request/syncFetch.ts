@@ -30,6 +30,12 @@ const getTimeout = (timeout: number | undefined | null) => {
   return baseTimeout;
 };
 
+const getRedirect = (val?: boolean | number) => {
+  if (typeof val === 'boolean') return val ? 3 : 0;
+  if (typeof val === 'number') return val > 0 ? val : 0;
+  return 3;
+};
+
 const isLikelyPath = (p: string) => {
   if (typeof p !== 'string') return false;
   if (p.trim() === '') return false;
@@ -67,7 +73,7 @@ const fetch = (url: string, options: RequestOptions = {}) => {
       method,
       headers,
       timeout: getTimeout(options?.timeout),
-      redirect: options?.redirect === false ? 'manual' : 'follow',
+      redirect: getRedirect(options?.redirect) > 0 ? 'follow' : 'manual',
     };
 
     if (!config.headers['User-Agent']) {

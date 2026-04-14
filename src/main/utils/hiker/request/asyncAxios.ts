@@ -44,6 +44,12 @@ const getTimeout = (timeout: number | undefined | null) => {
   return baseTimeout;
 };
 
+const getRedirect = (val?: boolean | number) => {
+  if (typeof val === 'boolean') return val ? 3 : 0;
+  if (typeof val === 'number') return val > 0 ? val : 0;
+  return 3;
+};
+
 const isLikelyPath = (p: string) => {
   if (typeof p !== 'string') return false;
   if (p.trim() === '') return false;
@@ -75,7 +81,7 @@ const fetch = async (url: string, options: RequestOptions = {}) => {
       method,
       headers,
       timeout: getTimeout(options?.timeout),
-      maxRedirects: options?.redirect === false ? 0 : undefined,
+      maxRedirects: getRedirect(options?.redirect),
       responseType: 'arraybuffer',
     };
 

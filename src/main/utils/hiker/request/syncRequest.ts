@@ -30,6 +30,12 @@ const getTimeout = (timeout: number | undefined | null) => {
   return baseTimeout;
 };
 
+const getRedirect = (val?: boolean | number) => {
+  if (typeof val === 'boolean') return val ? 3 : 0;
+  if (typeof val === 'number') return val > 0 ? val : 0;
+  return 3;
+};
+
 const isLikelyPath = (p: string) => {
   if (typeof p !== 'string') return false;
   if (p.trim() === '') return false;
@@ -70,27 +76,20 @@ const fetch = (url: string, options: RequestOptions = {}) => {
     const method: HttpMethod = (options.method || 'GET').toUpperCase() as HttpMethod;
     const headers = headersPascalCase(options?.headers || {});
 
-    const config: {
-      headers: Record<string, any>;
-      timeout: number;
-      followRedirects: boolean;
-      form?: FormData;
-      body?: string | Buffer | Uint8Array | FormData | Record<string, any>;
-      json?: object;
-    } = {
+    const config: Options = {
       headers,
       timeout: getTimeout(options?.timeout),
-      followRedirects: options?.redirect !== false,
+      maxRedirects: getRedirect(options?.redirect),
     };
 
-    if (!config.headers['User-Agent']) {
-      config.headers['User-Agent'] = MOBILE_UA;
+    if (!config.headers?.['User-Agent']) {
+      config.headers!['User-Agent'] = MOBILE_UA;
     }
     if (!config.headers?.Accept) {
       config.headers!.Accept = '*/*';
     }
 
-    const contentType = config.headers?.['Content-Type'] || '';
+    const contentType: string = (config.headers?.['Content-Type'] as string) || '';
     let charset: string = 'utf-8';
     if (contentType.includes('charset=')) {
       const match = contentType.match(/charset=([\w-]+)/i);
@@ -105,7 +104,7 @@ const fetch = (url: string, options: RequestOptions = {}) => {
         Object.entries(body).forEach(([key, value]) => fd.append(key, value as string));
         config.form = fd;
       } else if (['text/plain', 'text/html', 'text/xml'].includes(contentType)) {
-        config.body = options.body;
+        config.body = options.body as string | Buffer<ArrayBufferLike>;
       } else if (contentType.includes('multipart/form-data')) {
         const fd = new FormData();
         if (isLikelyPath(options.body as string)) {
@@ -146,18 +145,18 @@ const fetch = (url: string, options: RequestOptions = {}) => {
             raw = Buffer.from(options.body as string);
           }
         }
-        config.body = raw;
+        config.body = raw as string | Buffer<ArrayBufferLike>;
       } else {
         const body = isJsonStr(options.body) ? JSON5.parse(options.body as string) : options.body;
         config.json = body;
       }
     }
     // json和form会自动设置Content-Type
-    if (config.json || config.form) delete config.headers['Content-Type'];
+    if (config.json || config.form) delete config.headers?.['Content-Type'];
 
     // console.warn(`[request] url: ${url} | method: ${method} | options: ${JSON.stringify(config)}`);
 
-    const resp = syncRequest(method, url, config as Options);
+    const resp = syncRequest(method, url, config);
     // @ts-expect-error override getBody
     resp.getBody = function (encoding: BufferEncoding | undefined): string | Buffer {
       return encoding ? this.body.toString(encoding) : this.body;
