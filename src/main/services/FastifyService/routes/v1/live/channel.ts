@@ -73,7 +73,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       return {
         code: 0,
         msg: 'ok',
-        data: { list, total: dbResPage.total, class: dbResGroup },
+        data: { list, total: dbResPage.total, class: dbResGroup ?? [] },
       };
     },
   );

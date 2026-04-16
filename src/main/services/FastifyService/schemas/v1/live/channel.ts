@@ -1,11 +1,11 @@
 import { Schema } from '@main/types/server';
 import { Type } from '@sinclair/typebox';
 
-import { createHttpSuccessResponseSchema } from '../../base';
+import { PageQuery, ResponseSuccessSchema } from '../../base';
 
-const API_PREFIX = '[live]channel';
+const API_PREFIX = 'Channel';
 
-const baseItemSchema = Type.Object({
+const ChannelSchema = Type.Object({
   id: Type.String({ description: 'id' }),
   name: Type.Union([Type.String(), Type.Null()], { description: 'name' }),
   api: Type.String({ description: 'api' }),
@@ -16,19 +16,60 @@ const baseItemSchema = Type.Object({
   updatedAt: Type.Integer({ format: 'int64', description: 'updated timestamp' }),
 });
 
-const inputItemSchema = Type.Partial(Type.Omit(baseItemSchema, ['id', 'createdAt', 'updatedAt']));
+const ChannelResponse = Type.Omit(ChannelSchema, []);
 
-const putItemSchema = Type.Partial(baseItemSchema);
+const ChannelListResponse = Type.Object({
+  list: Type.Array(ChannelResponse),
+  total: Type.Number({ description: 'Total count' }),
+  class: Type.Array(Type.Object({ label: Type.String(), value: Type.String() })),
+});
 
-const outputItemSchema = baseItemSchema;
+const ChannelEpgResponse = Type.Object({
+  start: Type.String({ pattern: '^([01]\\d|2[0-3]):[0-5]\\d$', description: 'start time' }),
+  end: Type.String({ pattern: '^([01]\\d|2[0-3]):[0-5]\\d$', description: 'end time' }),
+  title: Type.String({ description: 'title' }),
+  desc: Type.Optional(Type.String({ description: 'description' })),
+});
+
+const ChannelResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: ChannelResponse,
+  },
+  { description: 'Response schema for Channel response' },
+);
+
+const ChannelListResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: ChannelListResponse,
+  },
+  { description: 'Response schema for Channel list' },
+);
+
+const ChannelEpgResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Array(ChannelEpgResponse),
+  },
+  { description: 'Response schema for EPG list' },
+);
+
+const ChannelArrayResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Array(ChannelResponse),
+  },
+  { description: 'Response schema for Channel array' },
+);
 
 export const addSchema = {
   tags: [API_PREFIX],
   summary: 'Add data',
-  description: 'Add a new data.',
-  body: inputItemSchema,
+  description: 'Add a new data',
+  body: Type.Partial(Type.Omit(ChannelSchema, ['id', 'createdAt', 'updatedAt'])),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: ChannelArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -39,14 +80,18 @@ export const addSchema = {
 export const deleteSchema = {
   tags: [API_PREFIX],
   summary: 'Delete data',
-  description: 'Delete data by id or type, if id and type is empty, delete all.',
+  description: 'Delete by id or type, if id and type is empty, delete all',
   body: Type.Object({
-    id: Type.Optional(Type.Array(Type.String(), { description: 'data id' })),
+    id: Type.Optional(Type.Array(Type.String(), { description: 'id' })),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Null(), {
-      description: 'Successful Operation',
-    }),
+    200: Type.Object(
+      {
+        ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+        data: Type.Null({ description: 'delete success' }),
+      },
+      { description: 'Response schema for delete data' },
+    ),
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -57,13 +102,13 @@ export const deleteSchema = {
 export const putSchema = {
   tags: [API_PREFIX],
   summary: 'Set data',
-  description: 'Set data.',
+  description: 'Set data',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'updated data id' }),
-    doc: putItemSchema,
+    id: Type.Array(Type.String(), { description: 'updated id' }),
+    doc: Type.Partial(Type.Omit(ChannelSchema, ['id', 'createdAt', 'updatedAt'])),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: ChannelArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -74,22 +119,16 @@ export const putSchema = {
 export const pageSchema = {
   tags: [API_PREFIX],
   summary: 'Get list',
-  description: 'Get list with pagination and filtering.',
-  querystring: Type.Object({
-    page: Type.Integer({ format: 'int32', description: 'page number' }),
-    pageSize: Type.Integer({ format: 'int32', description: 'page size' }),
-    kw: Type.Optional(Type.String({ description: 'search keyword' })),
-    group: Type.Optional(Type.String({ description: 'search group' })),
-  }),
+  description: 'Get list with pagination and filtering',
+  querystring: Type.Partial(
+    Type.Object({
+      kw: Type.String({ description: 'search keyword' }),
+      group: Type.String({ description: 'search group' }),
+      ...PageQuery,
+    }),
+  ),
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Object({
-        list: Type.Optional(Type.Array(outputItemSchema)),
-        total: Type.Optional(Type.Integer({ format: 'int32' })),
-        class: Type.Optional(Type.Array(Type.Object({ label: Type.String(), value: Type.String() }))),
-      }),
-      { description: 'Successful Operation' },
-    ),
+    200: ChannelListResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -100,14 +139,12 @@ export const pageSchema = {
 export const getDetailSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by id.',
+  description: 'Get detail by id',
   params: Type.Object({
-    id: Type.String({ description: 'data id' }),
+    id: Type.String({ description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(outputItemSchema, {
-      description: 'Successful Operation',
-    }),
+    200: ChannelResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -118,25 +155,13 @@ export const getDetailSchema = {
 export const getEpgSchema = {
   tags: [API_PREFIX],
   summary: 'Get epg',
-  description: 'Get epg by channel and date.',
+  description: 'Get epg by channel and date',
   querystring: Type.Object({
-    ch: Type.String({ description: 'data channel' }),
-    date: Type.Optional(Type.String({ format: 'date', description: 'data date' })),
+    ch: Type.String({ description: 'channel' }),
+    date: Type.Optional(Type.String({ format: 'date', description: 'date' })),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Array(
-        Type.Object({
-          start: Type.String({ pattern: '^([01]\\d|2[0-3]):[0-5]\\d$', description: 'start time' }),
-          desc: Type.Optional(Type.String({ description: 'data description' })),
-          end: Type.String({ pattern: '^([01]\\d|2[0-3]):[0-5]\\d$', description: 'end time' }),
-          title: Type.String({ description: 'data title' }),
-        }),
-      ),
-      {
-        description: 'Successful Operation',
-      },
-    ),
+    200: ChannelEpgResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,

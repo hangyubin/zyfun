@@ -1,11 +1,11 @@
 import { Schema } from '@main/types/server';
 import { Type } from '@sinclair/typebox';
 
-import { createHttpSuccessResponseSchema } from '../base';
+import { PageQuery, ResponseSuccessSchema } from '../../base';
 
-const API_PREFIX = '[plugin]work';
+const API_PREFIX = 'plugin';
 
-const baseItemSchema = Type.Object({
+const PluginSchema = Type.Object({
   id: Type.String({ description: 'id' }),
   type: Type.Integer({ format: 'int32', enum: [1, 2, 3], description: 'type' }),
   name: Type.String({ description: 'plugin name' }),
@@ -24,26 +24,50 @@ const baseItemSchema = Type.Object({
   updatedAt: Type.Integer({ format: 'int64', description: 'updated timestamp' }),
 });
 
-const outputItemSchema = baseItemSchema;
+const PluginResponse = Type.Omit(PluginSchema, []);
+
+const PluginListResponse = Type.Object({
+  list: Type.Array(PluginResponse),
+  total: Type.Number({ description: 'Total count' }),
+});
+
+const PluginResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: PluginResponse,
+  },
+  { description: 'Response schema for setting detail' },
+);
+
+const PluginListResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: PluginListResponse,
+  },
+  { description: 'Response schema for plugin list' },
+);
+
+const PluginArrayResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Array(PluginResponse),
+  },
+  { description: 'Response schema for plugin array' },
+);
 
 export const pageSchema = {
   tags: [API_PREFIX],
   summary: 'Get list',
-  description: 'Get list with pagination and filtering.',
-  querystring: Type.Object({
-    page: Type.Integer({ format: 'int32', description: 'page number' }),
-    pageSize: Type.Integer({ format: 'int32', description: 'page size' }),
-    kw: Type.Optional(Type.String({ description: 'search keyword' })),
-    type: Type.Optional(Type.Integer({ format: 'int32', enum: [1, 2, 3], description: 'search type' })),
-  }),
+  description: 'Get list with pagination and filtering',
+  querystring: Type.Partial(
+    Type.Object({
+      kw: Type.String({ description: 'search keyword' }),
+      type: Type.Integer({ format: 'int32', enum: [1, 2, 3], description: 'search type' }),
+      ...PageQuery,
+    }),
+  ),
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Object({
-        list: Type.Optional(Type.Array(baseItemSchema)),
-        total: Type.Optional(Type.Integer({ format: 'int32' })),
-      }),
-      { description: 'Successful Operation' },
-    ),
+    200: PluginListResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -54,14 +78,12 @@ export const pageSchema = {
 export const getDetailSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by id.',
+  description: 'Get detail by id',
   params: Type.Object({
-    id: Type.String({ description: 'data id' }),
+    id: Type.String({ description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(outputItemSchema, {
-      description: 'Successful Operation',
-    }),
+    200: PluginResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -72,14 +94,12 @@ export const getDetailSchema = {
 export const installSchema = {
   tags: [API_PREFIX],
   summary: 'Install plugin',
-  description: 'Install plugin by project path.',
+  description: 'Install plugin by project path',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'install data path' }),
+    id: Type.Array(Type.String(), { description: 'path' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), {
-      description: 'Successful Operation',
-    }),
+    200: PluginArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -90,14 +110,12 @@ export const installSchema = {
 export const uninstallSchema = {
   tags: [API_PREFIX],
   summary: 'Uninstall plugin',
-  description: 'Uninstall plugin by id.',
+  description: 'Uninstall plugin by id',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'uninstall data id' }),
+    id: Type.Array(Type.String(), { description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), {
-      description: 'Successful Operation',
-    }),
+    200: PluginArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -108,14 +126,12 @@ export const uninstallSchema = {
 export const startSchema = {
   tags: [API_PREFIX],
   summary: 'Start plugin',
-  description: 'Start plugin by id.',
+  description: 'Start plugin by id',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'start data id' }),
+    id: Type.Array(Type.String(), { description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), {
-      description: 'Successful Operation',
-    }),
+    200: PluginArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -126,14 +142,12 @@ export const startSchema = {
 export const stopSchema = {
   tags: [API_PREFIX],
   summary: 'Stop plugin',
-  description: 'Stop plugin by id.',
+  description: 'Stop plugin by id',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'stop data id' }),
+    id: Type.Array(Type.String(), { description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), {
-      description: 'Successful Operation',
-    }),
+    200: PluginArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,

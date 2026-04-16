@@ -91,7 +91,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const { relateId, videoId, type } = req.query;
       const dbRes = await dbService.history.getByField({ relateId, videoId, ...(type ? { type } : {}) });
       const res = dbRes?.[0];
-      return { code: 0, msg: 'ok', data: res };
+      return { code: 0, msg: 'ok', data: res ?? {} };
     },
   );
 

@@ -1,11 +1,11 @@
 import { Schema } from '@main/types/server';
 import { Type } from '@sinclair/typebox';
 
-import { createHttpSuccessResponseSchema } from '../../base';
+import { PageQuery, ResponseSuccessSchema } from '../../base';
 
-const API_PREFIX = '[moment]star';
+const API_PREFIX = 'moment';
 
-const baseItemSchema = Type.Object({
+const StarSchema = Type.Object({
   id: Type.String({ description: 'id' }),
   type: Type.Integer({ format: 'int32', enum: [1, 2, 3], description: 'type' }),
   relateId: Type.String({ description: 'relate id' }),
@@ -18,19 +18,53 @@ const baseItemSchema = Type.Object({
   updatedAt: Type.Integer({ format: 'int64', description: 'updated timestamp' }),
 });
 
-const inputItemSchema = Type.Partial(Type.Omit(baseItemSchema, ['id', 'createdAt', 'updatedAt']));
+const StarResponse = Type.Omit(StarSchema, []);
 
-const putItemSchema = Type.Partial(baseItemSchema);
+const StarListResponse = Type.Object({
+  list: Type.Array(
+    Type.Intersect([
+      StarSchema,
+      Type.Object({
+        relateSite: Type.Any({ description: 'Relate info' }),
+      }),
+    ]),
+  ),
+  total: Type.Optional(Type.Integer({ format: 'int32' })),
+});
 
-const outputItemSchema = baseItemSchema;
+const StarResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Union([StarResponse, Type.Object({}, { additionalProperties: false })], {
+      description: 'Star data',
+    }),
+  },
+  { description: 'Response schema for Star response' },
+);
+
+const StarListResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: StarListResponse,
+  },
+  { description: 'Response schema for Star list' },
+);
+
+const StarArrayResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Array(StarResponse),
+  },
+  { description: 'Response schema for Star array' },
+);
 
 export const addSchema = {
   tags: [API_PREFIX],
   summary: 'Add data',
-  description: 'Add a new data.',
-  body: inputItemSchema,
+  description: 'Add a new data',
+  body: Type.Partial(Type.Omit(StarSchema, ['id', 'createdAt', 'updatedAt'])),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: StarArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -41,19 +75,23 @@ export const addSchema = {
 export const deleteSchema = {
   tags: [API_PREFIX],
   summary: 'Delete data',
-  description: 'Delete data by id or type, if id and type is empty, delete all.',
+  description: 'Delete by id or type, if id and type is empty, delete all',
   body: Type.Partial(
     Type.Object({
-      id: Type.Optional(Type.Array(Type.String(), { description: 'data id' })),
+      id: Type.Optional(Type.Array(Type.String(), { description: 'id' })),
       type: Type.Optional(
         Type.Array(Type.Integer({ format: 'int32', enum: [1, 2, 3] }), { description: 'search type' }),
       ),
     }),
   ),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Null(), {
-      description: 'Successful Operation',
-    }),
+    200: Type.Object(
+      {
+        ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+        data: Type.Null({ description: 'delete success' }),
+      },
+      { description: 'Response schema for delete response' },
+    ),
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -64,13 +102,13 @@ export const deleteSchema = {
 export const putSchema = {
   tags: [API_PREFIX],
   summary: 'Set data',
-  description: 'Set data.',
+  description: 'Set data',
   body: Type.Object({
-    id: Type.Array(Type.String(), { description: 'updated data id' }),
-    doc: putItemSchema,
+    id: Type.Array(Type.String(), { description: 'updated id' }),
+    doc: Type.Partial(Type.Omit(StarSchema, ['id', 'createdAt', 'updatedAt'])),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: StarArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -81,30 +119,16 @@ export const putSchema = {
 export const pageSchema = {
   tags: [API_PREFIX],
   summary: 'Get list',
-  description: 'Get list with pagination and filtering.',
-  querystring: Type.Object({
-    page: Type.Integer({ format: 'int32', description: 'page number' }),
-    pageSize: Type.Integer({ format: 'int32', description: 'page size' }),
-    kw: Type.Optional(Type.String({ description: 'search keyword' })),
-    type: Type.Optional(Type.Array(Type.Integer({ format: 'int32', enum: [1, 2, 3] }), { description: 'search type' })),
-  }),
+  description: 'Get list with pagination and filtering',
+  querystring: Type.Partial(
+    Type.Object({
+      kw: Type.String({ description: 'search keyword' }),
+      type: Type.Array(Type.Integer({ format: 'int32', enum: [1, 2, 3] }), { description: 'search type' }),
+      ...PageQuery,
+    }),
+  ),
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Object({
-        list: Type.Optional(
-          Type.Array(
-            Type.Intersect([
-              outputItemSchema,
-              Type.Object({
-                relateSite: Type.Any({ description: 'relate info' }),
-              }),
-            ]),
-          ),
-        ),
-        total: Type.Optional(Type.Integer({ format: 'int32' })),
-      }),
-      { description: 'Successful Operation' },
-    ),
+    200: StarListResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -115,16 +139,14 @@ export const pageSchema = {
 export const findDetailSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by joint parameterization.',
+  description: 'Get detail by joint parameterization',
   querystring: Type.Object({
     relateId: Type.String({ description: 'relate id' }),
     videoId: Type.String({ description: 'video id' }),
     type: Type.Optional(Type.Integer({ format: 'int32', enum: [1, 2, 3], description: 'type' })),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(outputItemSchema, {
-      description: 'Successful Operation',
-    }),
+    200: StarResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -135,14 +157,12 @@ export const findDetailSchema = {
 export const getDetailSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by id.',
+  description: 'Get detail by id',
   params: Type.Object({
-    id: Type.String({ description: 'data id' }),
+    id: Type.String({ description: 'id' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(outputItemSchema, {
-      description: 'Successful Operation',
-    }),
+    200: StarResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,

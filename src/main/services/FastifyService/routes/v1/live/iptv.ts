@@ -63,17 +63,20 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       return {
         code: 0,
         msg: 'ok',
-        data: { list: dbResPage.list, total: dbResPage.total, default: dbResDefaultId },
+        data: {
+          list: dbResPage.list,
+          total: dbResPage.total,
+          default: dbResDefaultId ?? '',
+        },
       };
     },
   );
 
   fastify.get(`/${API_PREFIX}/active`, { schema: getActiveSchema }, async () => {
-    const [dbResAll, dbResDefaultId, dbResIptv, dbResGroup] = await Promise.all([
+    const [dbResAll, dbResDefaultId, dbResIptv] = await Promise.all([
       dbService.iptv.active(),
       dbService.setting.getValue('defaultIptv'),
       dbService.setting.getValue('live'),
-      dbService.channel.group(),
     ]);
 
     const dbResDefault = await dbService.iptv.get(dbResDefaultId);
@@ -83,8 +86,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       msg: 'ok',
       data: {
         list: dbResAll,
-        default: dbResDefault,
-        class: dbResGroup,
+        default: dbResDefault ?? {},
         extra: {
           epg: dbResIptv?.epg ?? '',
           logo: dbResIptv?.logo ?? '',

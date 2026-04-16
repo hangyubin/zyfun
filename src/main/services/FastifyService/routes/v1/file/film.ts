@@ -11,7 +11,7 @@ import {
   saveFile,
 } from '@main/utils/file';
 import { APP_FILE_PATH } from '@main/utils/path';
-import { autoSchema, makeSchema } from '@server/schemas/v1/file/film';
+import { autoSchema, makeSchema } from '@server/schemas/v1/file/tvbox';
 import { PREFIX_API } from '@shared/config/env';
 import { randomUUID } from '@shared/modules/crypto';
 import type { FastifyPluginAsync, FastifyRequest } from 'fastify';

@@ -20,8 +20,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       const { url } = req.query;
 
       if (!url) {
-        reply.code(400).send({ code: -1, msg: 'Invalid URL', data: null });
-        return;
+        return reply.code(400).send({ code: -1, msg: 'Invalid URL', data: null });
       }
 
       const cacheKey = generateCacheKey(url);
@@ -46,7 +45,7 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
           responseContent = base64.decode({ src: responseContent });
         }
 
-        reply
+        return reply
           .code(typeof status === 'number' ? status : Number.parseInt(status))
           .header('Content-Type', contentType)
           .send(responseContent);
@@ -67,12 +66,12 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
             const imageType = parts[0].split(':')[1];
             const imageBuffer = Buffer.from(parts[1], 'base64');
 
-            reply.type(imageType).send(imageBuffer);
+            return reply.type(imageType).send(imageBuffer);
           }
         }
       }
 
-      reply.code(302).redirect(url);
+      return reply.code(302).redirect(url);
     },
   );
 

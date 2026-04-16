@@ -1,9 +1,9 @@
 import { Schema } from '@main/types/server';
 import { Type } from '@sinclair/typebox';
 
-const API_PREFIX = '[file]film';
+const API_PREFIX = 'file';
 
-const filmSchema = Type.Object({
+const TvboxSchema = Type.Object({
   lives: Type.Array(
     Type.Object({
       group: Type.String(),
@@ -63,17 +63,19 @@ const filmSchema = Type.Object({
   wallpaper: Type.String({ description: 'wallpaper url' }),
 });
 
+const TvbosResponseSchema = Type.Partial(TvboxSchema, { description: 'Response schema for film content' });
+
 export const autoSchema = {
   tags: [API_PREFIX],
   summary: 'Get auto content',
   description:
-    'Get a file content by path level(three levels), operating system files if the type is system, which is a dangerous operation.',
+    'Get a file content by path level(three levels), operating system files if the type is system, which is a dangerous operation',
   params: Type.Object({
     type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {
-    200: Type.Partial(filmSchema, { description: 'Successful Operation' }),
+    200: TvbosResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -85,13 +87,13 @@ export const makeSchema = {
   tags: [API_PREFIX],
   summary: 'Get make content',
   description:
-    'Get a file content by generate index.json from index.js, operating system files if the type is system, which is a dangerous operation.',
+    'Get a file content by generate index.json from index.js, operating system files if the type is system, which is a dangerous operation',
   params: Type.Object({
     type: Type.String({ enum: ['file', 'system'], description: 'file type' }),
     '*': Type.String({ description: 'file path' }),
   }),
   response: {
-    200: Type.Partial(filmSchema, { description: 'Successful Operation' }),
+    200: TvbosResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,

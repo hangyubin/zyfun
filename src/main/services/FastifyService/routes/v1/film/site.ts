@@ -62,8 +62,8 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
         data: {
           list: dbResPage.list,
           total: dbResPage.total,
-          default: dbResDefaultId,
-          group: dbResGroup,
+          default: dbResDefaultId ?? '',
+          group: dbResGroup ?? [],
         },
       };
     },
@@ -84,11 +84,11 @@ const api: FastifyPluginAsync = async (fastify): Promise<void> => {
       msg: 'ok',
       data: {
         list: dbResAll,
-        default: dbResDefault,
+        default: dbResDefault ?? {},
         extra: {
-          group: dbResGroup,
-          filter: dbResSite.filterMode,
-          search: dbResSite.searchMode,
+          group: dbResGroup ?? [],
+          filter: dbResSite.filterMode ?? false,
+          search: dbResSite.searchMode ?? 'site',
         },
       },
     };

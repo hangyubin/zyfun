@@ -3,11 +3,11 @@ import { settingKeys, setupKeys } from '@shared/config/tblSetting';
 import type { TLiteral } from '@sinclair/typebox';
 import { Type } from '@sinclair/typebox';
 
-import { createHttpSuccessResponseSchema } from '../base';
+import { ResponseSuccessSchema } from '../../base';
 
-const API_PREFIX = '[setting]work';
+const API_PREFIX = 'setting';
 
-const baseItemSchema = Type.Object({
+const SettingSchema = Type.Object({
   id: Type.String({ description: 'id' }),
   key: Type.String({ description: 'key' }),
   value: Type.Any({ description: 'value' }),
@@ -15,18 +15,56 @@ const baseItemSchema = Type.Object({
   updatedAt: Type.Integer({ format: 'int64', description: 'updated timestamp' }),
 });
 
-const outputItemSchema = baseItemSchema;
+const SettingResponse = Type.Omit(SettingSchema, []);
+
+const SettingResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: SettingResponse,
+  },
+  { description: 'Response schema for setting detail' },
+);
+
+const SettingArrayResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Array(SettingResponse),
+  },
+  { description: 'Response schema for setting array' },
+);
+
+const SettingObjectResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Record(
+      Type.Union(settingKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof settingKeys)[number]>[]),
+      Type.Any(),
+    ),
+  },
+  { description: 'Response schema for setting object' },
+);
+
+const SetupObjectResponseSchema = Type.Object(
+  {
+    ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+    data: Type.Record(
+      Type.Union(setupKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof setupKeys)[number]>[]),
+      Type.Any(),
+    ),
+  },
+  { description: 'Response schema for setting setup object' },
+);
 
 export const addSchema = {
   tags: [API_PREFIX],
-  summary: 'Add data',
-  description: 'Add a new data.',
+  summary: 'Create data',
+  description: 'Create a new data',
   body: Type.Object({
     key: Type.String({ enum: settingKeys, description: 'key' }),
     value: Type.Any({ description: 'value' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: SettingArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -37,14 +75,18 @@ export const addSchema = {
 export const deleteSchema = {
   tags: [API_PREFIX],
   summary: 'Delete data',
-  description: 'Delete data by keys, if keys is empty, delete all.',
+  description: 'Delete data by keys, if keys is empty, delete all',
   body: Type.Object({
-    keys: Type.Optional(Type.Array(Type.String(), { description: 'data ids' })),
+    keys: Type.Optional(Type.Array(Type.String(), { description: 'ids' })),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Null(), {
-      description: 'Successful Operation',
-    }),
+    200: Type.Object(
+      {
+        ...Type.Omit(ResponseSuccessSchema, ['data']).properties,
+        data: Type.Null({ description: 'delete success' }),
+      },
+      { description: 'Response schema for delete response' },
+    ),
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -55,13 +97,13 @@ export const deleteSchema = {
 export const putSchema = {
   tags: [API_PREFIX],
   summary: 'Set data',
-  description: 'Set data.',
+  description: 'Set data',
   body: Type.Object({
     key: Type.String({ enum: settingKeys, description: 'key' }),
     value: Type.Any({ description: 'value' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Array(outputItemSchema), { description: 'Successful Operation' }),
+    200: SettingArrayResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -72,19 +114,9 @@ export const putSchema = {
 export const getSetupSchema = {
   tags: [API_PREFIX],
   summary: 'Get setup',
-  description: 'Get setup.',
+  description: 'Get setup',
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Partial(
-        Type.Record(
-          Type.Union(setupKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof setupKeys)[number]>[]),
-          Type.Any(),
-        ),
-      ),
-      {
-        description: 'Successful Operation',
-      },
-    ),
+    200: SetupObjectResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -95,19 +127,9 @@ export const getSetupSchema = {
 export const getListSchema = {
   tags: [API_PREFIX],
   summary: 'Get list',
-  description: 'Get list.',
+  description: 'Get list',
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Partial(
-        Type.Record(
-          Type.Union(settingKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof settingKeys)[number]>[]),
-          Type.Any(),
-        ),
-      ),
-      {
-        description: 'Successful Operation',
-      },
-    ),
+    200: SettingObjectResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -118,14 +140,12 @@ export const getListSchema = {
 export const getDetailSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by key.',
+  description: 'Get detail by key',
   params: Type.Object({
     key: Type.String({ enum: settingKeys, description: 'key' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(outputItemSchema, {
-      description: 'Successful Operation',
-    }),
+    200: SettingResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -136,14 +156,12 @@ export const getDetailSchema = {
 export const getDetailValueSchema = {
   tags: [API_PREFIX],
   summary: 'Get detail',
-  description: 'Get detail by key.',
+  description: 'Get detail by key',
   params: Type.Object({
     key: Type.String({ enum: settingKeys, description: 'key' }),
   }),
   response: {
-    200: createHttpSuccessResponseSchema(Type.Any(), {
-      description: 'Successful Operation',
-    }),
+    200: ResponseSuccessSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,
@@ -154,24 +172,16 @@ export const getDetailValueSchema = {
 export const putSourceSchema = {
   tags: [API_PREFIX],
   summary: 'Set all data',
-  description: 'Set all data.',
+  description: 'Set all data',
   body: Type.Partial(
     Type.Record(
       Type.Union(settingKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof settingKeys)[number]>[]),
       Type.Any(),
     ),
-    { description: 'settings' },
+    { description: 'Setting object body' },
   ),
   response: {
-    200: createHttpSuccessResponseSchema(
-      Type.Partial(
-        Type.Record(
-          Type.Union(settingKeys.map((k) => Type.Literal(k)) as TLiteral<(typeof settingKeys)[number]>[]),
-          Type.Any(),
-        ),
-      ),
-      { description: 'Successful Operation' },
-    ),
+    200: SettingObjectResponseSchema,
     default: {
       description: 'Unexpected Error',
       $ref: Schema.ApiReponseError,

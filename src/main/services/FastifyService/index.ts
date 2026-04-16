@@ -20,7 +20,7 @@ import StatusCodes from 'http-status-codes';
 import qs from 'qs';
 
 import routeModules from './routes';
-import { HttpErrorResponseSchema, HttpRedirectResponseSchema, HttpSuccessResponseSchema } from './schemas/base';
+import { ResponseErrorSchema, ResponseRedirectSchema, ResponseSuccessSchema } from './schemas/base';
 
 const logger = loggerService.withContext(LOG_MODULE.FASTIFY);
 
@@ -197,9 +197,9 @@ export class FastifyService {
   }
 
   private async registerSchemas(): Promise<void> {
-    this.server!.addSchema({ ...HttpSuccessResponseSchema, $id: Schema.ApiReponseSuccess });
-    this.server!.addSchema({ ...HttpErrorResponseSchema, $id: Schema.ApiReponseError });
-    this.server!.addSchema({ ...HttpRedirectResponseSchema, $id: Schema.ApiReponseRedirect });
+    this.server!.addSchema({ ...ResponseSuccessSchema, $id: Schema.ApiReponseSuccess });
+    this.server!.addSchema({ ...ResponseErrorSchema, $id: Schema.ApiReponseError });
+    this.server!.addSchema({ ...ResponseRedirectSchema, $id: Schema.ApiReponseRedirect });
   }
 
   private async registerRoutes(): Promise<void> {
