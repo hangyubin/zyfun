@@ -317,7 +317,7 @@ const throttleGetSuggestList = throttle(getSuggestList, 1000, { edges: ['leading
 const getHistoryConfig = async () => {
   try {
     const resp = await fetchHistoryPage({
-      page: 1,
+      pageNum: 1,
       pageSize: MAX_HISTORY_SIZE,
       type: [5],
     });

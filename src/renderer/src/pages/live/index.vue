@@ -212,7 +212,7 @@ const getChannel = async (): Promise<number> => {
   const { pageIndex, pageSize } = pagination.value;
 
   const resp = await fetchChannelPage({
-    page: pageIndex,
+    pageNum: pageIndex,
     pageSize,
     kw: searchValue.value,
     group: active.value.class,

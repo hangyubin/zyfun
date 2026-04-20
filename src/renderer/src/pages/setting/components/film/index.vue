@@ -156,7 +156,7 @@ const resetTable = () => {
 const fetchTable = async () => {
   try {
     const resp = await fetchSitePage({
-      page: pagination.value.current,
+      pageNum: pagination.value.current,
       pageSize: pagination.value.pageSize,
       kw: searchValue.value,
     });

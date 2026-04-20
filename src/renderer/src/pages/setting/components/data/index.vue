@@ -344,7 +344,7 @@ const refreshEmitter = (types: string[] = []) => {
 
 const getHistoryConf = async (importType: IDataImportType) => {
   try {
-    const resp = await fetchHistoryPage({ page: 1, pageSize: 10, type: [HISTORY_TYPE_MAP[importType]] });
+    const resp = await fetchHistoryPage({ pageNum: 1, pageSize: 10, type: [HISTORY_TYPE_MAP[importType]] });
 
     const rawList = isArray(resp?.list) ? resp.list : [];
     const target = importType === DATA_IMPORT_TYPE.SIMPLE ? importSimpleHistoryList : importCompleteHistoryList;
