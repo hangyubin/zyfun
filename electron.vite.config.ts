@@ -112,10 +112,7 @@ export default defineConfig({
           },
         },
       }),
-      vueJsx({
-        transformOn: true,
-        // oxc: true,
-      }),
+      vueJsx(),
       AutoImport({
         resolvers: [
           TDesignResolver({
