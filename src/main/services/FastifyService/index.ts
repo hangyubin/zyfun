@@ -16,7 +16,6 @@ import { LOG_MODULE } from '@shared/config/logger';
 import { CacheService } from '@shared/modules/cache';
 import type { FastifyError, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fastify from 'fastify';
-import StatusCodes from 'http-status-codes';
 import qs from 'qs';
 
 import routeModules from './routes';
@@ -124,7 +123,7 @@ export class FastifyService {
 
       const statusCode = error.statusCode ?? 500;
 
-      return reply.status(statusCode >= 500 ? StatusCodes.INTERNAL_SERVER_ERROR : StatusCodes.BAD_REQUEST).send({
+      return reply.code(statusCode).send({
         code: -1,
         msg: statusCode >= 500 && isDev ? 'Internal Server Error' : error.message,
         data: error.validation,
@@ -136,7 +135,7 @@ export class FastifyService {
     this.server!.addHook('onTimeout', async (req: FastifyRequest, reply: FastifyReply) => {
       req.log.warn(`Fastify Response Timeout: ${req.url}`);
 
-      return reply.status(StatusCodes.REQUEST_TIMEOUT).send({
+      return reply.code(408).send({
         code: -1,
         msg: 'Request Timeout',
         data: null,
