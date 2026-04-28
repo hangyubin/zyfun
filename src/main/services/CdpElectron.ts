@@ -83,7 +83,7 @@ export class CdpElectron {
     this.win = null;
   }
 
-  private reasonUserAgentMetadata(userAgent: string) {
+  private parseUserAgentMetadata(userAgent: string) {
     const isMobile = /Mobile|Android|iPhone/i.test(userAgent);
 
     return {
@@ -109,7 +109,7 @@ export class CdpElectron {
       // await page.setUserAgent(ua); // @deprecated api
       await page.setUserAgent({
         userAgent,
-        userAgentMetadata: this.reasonUserAgentMetadata(userAgent),
+        userAgentMetadata: this.parseUserAgentMetadata(userAgent),
       });
 
       delete h['User-Agent'];
