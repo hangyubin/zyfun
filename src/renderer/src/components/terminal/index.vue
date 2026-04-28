@@ -76,7 +76,7 @@ export type IXTermOptions = Omit<ITerminalOptions, 'theme'> & {
   theme?: IXTermTheme;
   searchTheme?: IXTermSearchTheme;
 };
-type ITerminalConsoleLog = Exclude<LogLevel, 'verbose' | 'silly' | 'none'> | 'log';
+type ITerminalConsoleLog = Exclude<IXTermLog, 'verbose' | 'silly' | 'none'> | 'log';
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected';
 
 // terminal
