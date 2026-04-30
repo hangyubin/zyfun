@@ -67,6 +67,7 @@ packages/*/build
 !.vscode/settings.json
 .zed/*
 .bitfun/*
+.codeartsdoer/*
 
 # Env
 .env
